@@ -1,0 +1,38 @@
+struct rst_info *rtc_info = system_get_rst_info();
+os_printf("reset reason: %x\n", rtc_info->reason);
+if (rtc_info->reason == REASON_WDT_RST ||
+rtc_info->reason == REASON_EXCEPTION_RST ||
+rtc_info->reason == REASON_SOFT_WDT_RST) {
+if (rtc_info->reason == REASON_EXCEPTION_RST) {
+os_printf("Fatal exception (%d):\n", rtc_info-
+>exccause);
+}
+os_printf("epc1=0x%08x, epc2=0x%08x, epc3=0x%08x,
+excvaddr=0x%08x, depc=0x%08x\n",
+rtc_info->epc1, rtc_info->epc2, rtc_info-
+>epc3, rtc_info->excvaddr, rtc_info->depc);
+}
+
+ ets Jan  8 2013,rst cause:2, boot mode:(3,6)
+
+load 0x40100000, len 25648, room 16 
+tail 0
+chksum 0xcf
+load 0x3ffe8000, len 1272, room 8 
+tail 0
+chksum 0xda
+load 0x3ffe8500, len 1140, room 8 
+tail 12
+chksum 0x72
+csum 0x72
+
+
+***********
+0 非法指令
+6 除数为0
+9 读写操作地址非对齐
+28/29 访问非法地址 
+**********
+Fatal exception (29):    28/29 访问非法地址  1.Cache被关闭后访问Cache. 2.函数指针野指针
+epc1=0x402265e8, epc2=0x00000000, epc3=0x00000000,excvaddr=0x00000008, depc=0x00000000
+
