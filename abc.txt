@@ -25,7 +25,7 @@ load 0x3ffe8500, len 1140, room 8
 tail 12
 chksum 0x72
 csum 0x72
-
+************
 
 ***********
 0 ∑«∑®÷∏¡Ó
