@@ -30,7 +30,7 @@
 
 //#include "gpio.h"//GPIO口操作
 #include "modules/gpio_test.h"
-//设置定时器名字
+//设置定时器名字00000000000011111111111111111111111111
 os_timer_t led_01_timer;
 
 /**  #define
