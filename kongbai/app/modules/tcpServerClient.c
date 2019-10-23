@@ -384,7 +384,6 @@ static void tcp_server_listen_cb(void *arg);
 static void ICACHE_FLASH_ATTR
 tcp_server_sent_cb(void *arg){
 	os_printf("tcp server send data successful\r\n");
-	system_soft_wdt_feed();
 
 }
 
@@ -435,7 +434,7 @@ tcp_server_discon_cb(void *arg){
 static void ICACHE_FLASH_ATTR
 tcp_server_listen_cb(void *arg){
 	struct espconn *pespconn = arg;
-	system_soft_wdt_feed();
+	//system_soft_wdt_feed(); //喂狗
 
 	os_printf("tcp server have tcp client connect\r\n");
 	espconn_regist_recvcb(pespconn,tcp_server_recv_cb);//注册收到数据回调函数
@@ -479,11 +478,12 @@ void ICACHE_FLASH_ATTR
 tcp_server_init(struct espconn *espconn,uint16 local_port){
 
 	os_printf("tcp server waiting tcp client connect!\r\n");
+	/* "."一般情况下读作"的” “->”一般读作"指向的结构体的" */
 	espconn->proto.tcp = (esp_tcp *)os_zalloc(sizeof(esp_tcp));
-	espconn->type = ESPCONN_TCP;
+	espconn->type = ESPCONN_TCP;  //espconn->type   等价于 *(espconn).type ； ->（结构体，类，共同体等）取成员运算符
 
 	espconn->proto.tcp->local_port = local_port;//设置本地监听的端口号，等待Client连接
-	system_soft_wdt_feed();
+	
 
 	espconn_regist_connectcb(espconn,tcp_server_listen_cb);//注册Server监听回调函数
 	espconn_regist_reconcb(espconn,tcp_server_recon_cb);//注册断连重新连接回调函数

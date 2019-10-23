@@ -150,7 +150,12 @@ void system_soft_wdt_restart(void);
 void system_soft_wdt_feed(void);
 
 void system_show_malloc(void);
-
+/*
+0x00  关闭wifi功能
+0x01  客户端模式_连接路由器
+0x02  AP模式_热点
+0x03  混合模式
+*/
 #define NULL_MODE       0x00
 #define STATION_MODE    0x01
 #define SOFTAP_MODE     0x02
@@ -221,12 +226,12 @@ typedef struct {
     AUTH_MODE  authmode;
 } wifi_fast_scan_threshold_t;
 
+/*站的配置*/
 struct station_config {
-    uint8 ssid[32];
-    uint8 password[64];
-    uint8 bssid_set;    // Note: If bssid_set is 1, station will just connect to the router  注意:如果bssid_set为1，则station将直接连接到路由器
-                        // 与ssid[]和bssid[]匹配。请检查一下。 with both ssid[] and bssid[] matched. Please check about this.
-    uint8 bssid[6];
+    uint8 ssid[32];     //wifi名字
+    uint8 password[64]; //wifi密码
+    uint8 bssid_set;    // 设0时表示不需要检查ap的mac地址； 注意:如果bssid_set为1，则station将直接连接到路由器
+    uint8 bssid[6];    // 与ssid[]和bssid[]匹配。请检查一下。 with both ssid[] and bssid[] matched. Please check about this.
     wifi_fast_scan_threshold_t threshold;
     bool open_and_wep_mode_disable; // 默认情况下可以连接到open/wep路由器。  Can connect to open/wep router by default.
 };
@@ -317,14 +322,14 @@ int wifi_station_set_username(uint8 *username, int len);
 void wifi_station_clear_username(void);
 
 struct softap_config {
-    uint8 ssid[32];
-    uint8 password[64];
-    uint8 ssid_len;    // Note: Recommend to set it according to your ssid  注意:建议根据您的ssid设置
-    uint8 channel;    // Note: support 1 ~ 13  注:支持1 ~ 13
-    AUTH_MODE authmode;    // Note: Don't support AUTH_WEP in softAP mode. 注意:在softAP模式下不支持AUTH_WEP。
-    uint8 ssid_hidden;    // Note: default 0
-    uint8 max_connection;    // Note: default 4, max 4
-    uint16 beacon_interval;    // Note: support 100 ~ 60000 ms, default 100
+    uint8 ssid[32];    //设置ssid名字，这个是8266发出来的wiif名字！不是要连接的路由器wifi名字！
+    uint8 password[64];  //设置ssid 密码
+    uint8 ssid_len;    // 设置ssid长度  Note: Recommend to set it according to your ssid  注意:建议根据您的ssid设置
+    uint8 channel;     //通道号1 ~ 13  Note: support 1 ~ 13  注:支持1 ~ 13
+    AUTH_MODE authmode;    //设置加密模式 默认3  Note: Don't support AUTH_WEP in softAP mode. 注意:在softAP模式下不支持AUTH_WEP。
+    uint8 ssid_hidden;    // 是否隐藏SSID  注意:默认为0 
+    uint8 max_connection;    // 最大连接数 Note: default 4, max 4
+    uint16 beacon_interval;    // 信标间隔时槽100 ~ 60000 ms   Note: support 100 ~ 60000 ms, default 100
 };
 
 bool wifi_softap_get_config(struct softap_config *config);
@@ -737,26 +742,27 @@ bool wifi_set_country(wifi_country_t *country);
 bool wifi_get_country(wifi_country_t *country);
 
 typedef enum {
-    SYSTEM_PARTITION_INVALID = 0,
-    SYSTEM_PARTITION_BOOTLOADER,            /* user can't modify this partition address, but can modify size 用户不能修改此分区地址，但可以修改大小*/
-    SYSTEM_PARTITION_OTA_1,                 /* user can't modify this partition address, but can modify size */
-    SYSTEM_PARTITION_OTA_2,                 /* user can't modify this partition address, but can modify size */
-    SYSTEM_PARTITION_RF_CAL,                /* user must define this partition  用户必须定义这个分区*/
-    SYSTEM_PARTITION_PHY_DATA,              /* user must define this partition */
-    SYSTEM_PARTITION_SYSTEM_PARAMETER,      /* user must define this partition */
-    SYSTEM_PARTITION_AT_PARAMETER,
-    SYSTEM_PARTITION_SSL_CLIENT_CERT_PRIVKEY,
-    SYSTEM_PARTITION_SSL_CLIENT_CA,
-    SYSTEM_PARTITION_SSL_SERVER_CERT_PRIVKEY,
-    SYSTEM_PARTITION_SSL_SERVER_CA,
-    SYSTEM_PARTITION_WPA2_ENTERPRISE_CERT_PRIVKEY,
-    SYSTEM_PARTITION_WPA2_ENTERPRISE_CA,
+    SYSTEM_PARTITION_INVALID = 0,      /*系统分区无效*/
+    SYSTEM_PARTITION_BOOTLOADER,            /*系统分区引导装载程序， 用户不能修改此分区地址，但可以修改大小 user can't modify this partition address, but can modify size 用户不能修改此分区地址，但可以修改大小*/
+    SYSTEM_PARTITION_OTA_1,                 /* 系统分区OTA_1，用户不能修改此分区地址，但可以修改大小 user can't modify this partition address, but can modify size */
+    SYSTEM_PARTITION_OTA_2,                 /* 系统分区OTA_2，用户不能修改此分区地址，但可以修改大小 user can't modify this partition address, but can modify size */
+    SYSTEM_PARTITION_RF_CAL,                /* 系统分区RF_CAL，用户必须定义这个分区 user must define this partition  用户必须定义这个分区*/
+    SYSTEM_PARTITION_PHY_DATA,              /* 系统分区物理量，用户必须定义这个分区 user must define this partition */
+    SYSTEM_PARTITION_SYSTEM_PARAMETER,      /* 系统分区系统参数，用户必须定义这个分区 user must define this partition */
+    SYSTEM_PARTITION_AT_PARAMETER,          /* 系统分区划分AT参数分区*/
+    SYSTEM_PARTITION_SSL_CLIENT_CERT_PRIVKEY,/*系统分区SSL客户端证书私钥*/
+    SYSTEM_PARTITION_SSL_CLIENT_CA,          /*系统分区SSL客户端CA*/
+    SYSTEM_PARTITION_SSL_SERVER_CERT_PRIVKEY,/*系统分区SSL服务器证书私钥*/
+    SYSTEM_PARTITION_SSL_SERVER_CA,          /*系统分区SSL服务器CA*/
+    SYSTEM_PARTITION_WPA2_ENTERPRISE_CERT_PRIVKEY,  /*系统分区WPA2企业证书私钥*/
+    SYSTEM_PARTITION_WPA2_ENTERPRISE_CA,    /*系统分区WPA2企业CA*/
     
-    SYSTEM_PARTITION_CUSTOMER_BEGIN = 100,  /* user can define partition after here 用户可以在这里定义分区*/
-    SYSTEM_PARTITION_MAX
+    SYSTEM_PARTITION_CUSTOMER_BEGIN = 100,  /* 系统分区客户开始  用户可以在这里定义分区user can define partition after here 用户可以在这里定义分区*/
+    SYSTEM_PARTITION_MAX                   /*系统分区最大化*/
 } partition_type_t;
 
 //typedef的解释是用来声明新的类型名来代替已有的类姓名, typedef int CHANGE;指定了用CHANGE代表int类型，CHANGE代表int
+//这里是给结构体命名为 partition_item_t
 typedef struct {
     partition_type_t type;    /* the partition type 分区类型*/
 	                          //typedef unsigned int        uint32_t;

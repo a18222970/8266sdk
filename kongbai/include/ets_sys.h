@@ -45,11 +45,11 @@ typedef uint32_t ETSHandle;
 typedef void ETSTimerFunc(void *timer_arg);
 
 typedef struct _ETSTIMER_ {
-    struct _ETSTIMER_    *timer_next;
-    uint32_t              timer_expire;
-    uint32_t              timer_period;
-    ETSTimerFunc         *timer_func;
-    void                 *timer_arg;
+    struct _ETSTIMER_    *timer_next;  //定时器下
+    uint32_t              timer_expire; //定时器到期
+    uint32_t              timer_period; //定时器周期
+    ETSTimerFunc         *timer_func;  //定时器函数
+    void                 *timer_arg;  //定时器参数
 } ETSTimer;
 
 /* interrupt related */

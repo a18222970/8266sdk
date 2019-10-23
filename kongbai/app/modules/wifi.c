@@ -76,8 +76,19 @@ WIFI_Connect(uint8_t* ssid, uint8_t* pass, WifiCallback cb)
 	struct station_config stationConf;
 
 	INFO("WIFI_INIT\r\n");
+	/** wifi_set_opmode_current
+		 * 设置并不保存WIFI模块工作模式，默认AP模式
+		 * 0x01 连接模式
+		 * 0x02 热点AP模式
+		 * 0x03混合模式
+		 */
 	//设置wifi工作模式，不保存
-	wifi_set_opmode_current(STATION_MODE); //STATION_MODE = 0x01
+	//wifi_set_opmode_current(STATION_MODE); //STATION_MODE = 0x01
+	//设置并不保存WIFI模块工作模式-客服端模式
+	//wifi_set_opmode_current(STATION_MODE); //STATION_MODE = 0x01
+	//设置并不保存WIFI模块工作模式-混合模式 SOFTAP_MODE 
+	//wifi_set_opmode_current(STATIONAP_MODE);//STATIONAP_MODE = 0x03
+	wifi_set_opmode_current(SOFTAP_MODE);//SOFTAP_MODE = 0x02
 
 	//wifi_station_set_auto_connect(FALSE);  //设置设备上电是否自动连接wifi，默认自动连接。
 	wifiCb = cb;

@@ -38,6 +38,6 @@ void tcp_client_init(struct espconn *espconn,uint8 *remote_ip,struct ip_addr *lo
  */
 sint8 tcp_server_send_data(struct espconn *espconn,uint8 *pdata,uint16 length);
 void tcp_server_init(struct espconn *espconn,uint16 local_port);
-void tcp_client_init1(struct espconn* espconn, uint8* remote_ip, struct ip_addr* local_ip, int remote_port);
+void tcp_server_init1(struct espconn* espconn, int local_port);
 
 #endif

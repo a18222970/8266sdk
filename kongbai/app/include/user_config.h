@@ -35,8 +35,8 @@
 
 //At the same time, only one can be 1
 //选择模式，TCP客服端，服务器端，UDP
-#define TCP_CLIENT 1
-#define TCP_SERVER 0
+#define TCP_CLIENT 0
+#define TCP_SERVER 1
 #define UDP_TEST   0
 
 #define SB_BIAOHAO "a001"//wifi名字

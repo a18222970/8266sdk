@@ -799,10 +799,10 @@ espconn_regist_write_finish(struct espconn *espconn, espconn_connect_callback wr
 
 /******************************************************************************
  * FunctionName : espconn_regist_connectcb
- * Description  : used to specify the function that should be called when
+ * Description  : 用于指定连接到主机时应调用的函数。  used to specify the function that should be called when
  *                connects to host.
- * Parameters   : espconn -- espconn to set the connect callback
- *                connect_cb -- connected callback function to call when connected
+ * Parameters   : espconn -- 设置连接回调 espconn to set the connect callback
+ *                connect_cb -- 已连接的回调函数，在连接时调用 connected callback function to call when connected
  * Returns      : none
 *******************************************************************************/
 sint8 ICACHE_FLASH_ATTR

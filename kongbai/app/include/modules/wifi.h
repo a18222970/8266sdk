@@ -1,9 +1,4 @@
-/*
- * wifi.h
- *
- *  Created on: Dec 30, 2014
- *      Author: Minh
- */
+/*使用#ifndef、#define、#endif组合宏定义的作用是：防止头文件的重复包含和编译*/
 
 #ifndef USER_WIFI_H_
 #define USER_WIFI_H_

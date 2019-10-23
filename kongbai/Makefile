@@ -22,6 +22,7 @@ else
 	OBJDUMP = xt-objdump
 endif
 
+############################ 第一处修改，对应user_main.c中(SPI_FLASH_SIZE_MAP == 6)  内存选项
 BOOT?=none
 APP?=0
 SPI_SPEED?=40
