@@ -24,7 +24,7 @@
 
 #ifndef __ESPCONN_H__
 #define __ESPCONN_H__
-
+#include "ip_addr.h"
 typedef sint8 err_t;
 
 typedef void *espconn_handle;
@@ -52,16 +52,16 @@ typedef void (* espconn_reconnect_callback)(void *arg, sint8 err);
 #define ESPCONN_HANDSHAKE  -28   /* ssl handshake failed	 */
 #define ESPCONN_SSL_INVALID_DATA  -61   /* ssl application invalid	 */
 
-/** Protocol family and type of the espconn */
+/** espconn的协议族和类型 */
 enum espconn_type {
-    ESPCONN_INVALID    = 0,
-    /* ESPCONN_TCP Group */
+    ESPCONN_INVALID    = 0,  //无效
+    /* TCP协议 */
     ESPCONN_TCP        = 0x10,
-    /* ESPCONN_UDP Group */
+    /* UDP协议 */
     ESPCONN_UDP        = 0x20,
 };
 
-/** Current state of the espconn. Non-TCP espconn are always in state ESPCONN_NONE! */
+/** espconn的当前状态. 非TCP espconn 始终处于 ESPCONN_NONE 状态! */
 enum espconn_state {
     ESPCONN_NONE,
     ESPCONN_WAIT,
@@ -100,17 +100,17 @@ typedef struct _remot_info{
 typedef void (* espconn_recv_callback)(void *arg, char *pdata, unsigned short len);
 typedef void (* espconn_sent_callback)(void *arg);
 
-/** A espconn descriptor */
+/** espconn 结构*/
 struct espconn {
-    /** type of the espconn (TCP, UDP) */
+    /**espconn (TCP、UDP)类型 */
     enum espconn_type type;
-    /** current state of the espconn */
+    /** espconn的当前状态 */
     enum espconn_state state;
     union {
         esp_tcp *tcp;
         esp_udp *udp;
     } proto;
-    /** A callback function that is informed about events for this espconn */
+    /** 一个回调函数，它被告知关于这个espconn的事件 */
     espconn_recv_callback recv_callback;
     espconn_sent_callback sent_callback;
     uint8 link_cnt;
@@ -296,7 +296,7 @@ sint8 espconn_regist_write_finish(struct espconn *espconn, espconn_connect_callb
 
 /******************************************************************************
  * FunctionName : espconn_send
- * Description  : sent data for client or server
+ * Description  : 发送给客户端或服务器的数据
  * Parameters   : espconn -- espconn to set for client or server
  *                psent -- data to send
  *                length -- length of data to send

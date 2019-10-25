@@ -38,6 +38,7 @@ void ets_install_putc1(void (*p)(char c));
 #define os_install_putc1 ets_install_putc1
 
 int ets_memcmp(const void *str1, const void *str2, unsigned int nbyte);
+
 void *ets_memcpy(void *dest, const void *src, unsigned int nbyte);
 void *ets_memmove(void *dest, const void *src, unsigned int nbyte);
 void *ets_memset(void *dest, int val, unsigned int nbyte);
@@ -50,6 +51,8 @@ char *ets_strncpy(char *s1, const char *s2, unsigned int n);
 char *ets_strstr(const char *s1, const char *s2);
 
 #define os_memcmp ets_memcmp
+
+/*ÄÚ´æ¿½±´º¯Êý*/
 #define os_memcpy ets_memcpy
 #define os_memmove ets_memmove
 #define os_memset ets_memset

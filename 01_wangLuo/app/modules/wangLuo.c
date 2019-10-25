@@ -15,8 +15,9 @@ History: // 修改历史记录列表，每条修改记录应包括修改日期�
 Author:
 Modification:
 2. ...
-*************************************************/
-/************************************************
+
+
+
 使用#ifndef、#define、#endif组合宏定义的作用是：防止头文件的重复包含和编译
 #ifndef            与#ifdef相反，判断某个宏是否未被定义
 #define            定义一个预处理宏
@@ -27,11 +28,6 @@ Modification:
 #elif                若#if, #ifdef, #ifndef或前面的#elif条件不满足，则执行#elif之后的语句，相当于C语法中的else-if
 #else              与#if, #ifdef, #ifndef对应, 若这些条件不满足，则执行#else之后的语句，相当于C语法中的else
 defined         　与#if, #elif配合使用，判断某个宏是否被定义
-
-
-#include "espconn.h"
-#include "os_type.h"
-#include "mem.h"
 ***************************************************/
 #include "modules/wangLuo.h"
 #include "user_config.h"
@@ -42,13 +38,34 @@ defined         　与#if, #elif配合使用，判断某个宏是否被定义
 #include "modules/debug.h"
 #include "os_type.h"
 #include "espconn.h"
+#include "mem.h"
 
 
 static ETSTimer WiFiLinker;  //重新构建定时器
 wifi_callback wifiCb = NULL;
 
 static uint8_t wifiStatus = STATION_IDLE, lastWifiStatus = STATION_IDLE;
+
 //wifi连接定时器回调
+/*************************************************
+Function: wifi_check_ip(void* arg) // 函数名称
+Description: wifi连接定时器回调 
+Calls:// 被本函数调用的函数清单
+	wifi_station_get_connect_status(): 返回连接AP状态;
+							   STATION IDLE            站闲置
+							   STATION CONNECTING      wifi连接
+							   STATION WRONG PASSWORD  密码错误
+							   STATION NO AP FOUND     未找到AP热点
+							   STATION CONNECT FAIL    连接失败
+							   STATION GOT IP          获得了IP
+Called By: // 调用本函数的函数清单
+	
+Input: // 输入参数说明，包括每个参数的作用、取值说明及参数间关系。
+	
+Output: // 对输出参数的说明。
+Return: // 函数返回值的说明
+Others: // 其它说明
+*************************************************/
 static void ICACHE_FLASH_ATTR
 wifi_check_ip(void* arg)
 {
@@ -61,7 +78,7 @@ wifi_check_ip(void* arg)
 	//wifi_station_get_connect_status() 查询 ESP8266 Wi-Fi Station 接⼝连接 AP 的状态。
 	wifiStatus = wifi_station_get_connect_status();
 	//STATION_GOT_IP//获得IP
-	if (wifiStatus == STATION_GOT_IP && ipConfig.ip.addr != 0)
+	if (wifiStatus == STATION_GOT_IP && ipConfig.ip.addr != 0) //获得IP
 	{
 		os_timer_setfn(&WiFiLinker, (os_timer_func_t*)wifi_check_ip, NULL);
 		os_timer_arm(&WiFiLinker, 2000, 0);
@@ -100,7 +117,7 @@ wifi_check_ip(void* arg)
 }
 
 /*************************************************
-Function: lian_jie_AP // 函数名称
+Function: lian_jie_AP(uint8_t* ssid, uint8_t* pass, wifi_callback hui_diao)  // 函数名称
 Description: wifi客户端模式连接路由器 // 函数功能、性能等的描述
 Calls:// 被本函数调用的函数清单
     wifi_set_opmode_current(): 设置wifi工作模式，不保存到flash;
@@ -145,4 +162,322 @@ lian_jie_AP(uint8_t* ssid, uint8_t* pass, wifi_callback hui_diao) //uint8_t 需�
 	wifi_station_set_auto_connect(ZI_DONG_LIAN_JIE);
 	wifi_station_connect();
 }
+
+/*tcp 客户端静态 函数声明*/
+static void tcp_client_sent_cb(void* arg);
+static void tcp_client_recv_cb(void* arg, char* pdata, unsigned short length);
+static void tcp_client_recon_cb(void* arg, sint8 error);
+static void tcp_client_discon_cb(void* arg);
+static void tcp_client_connect_cb(void* arg);
+
+/* TCP Client数据发送回调函数*/
+static void ICACHE_FLASH_ATTR
+tcp_client_sent_cb(void* arg) 
+{
+	os_printf("tcp client send data successful\r\n");//20
+}
+
+/* TCP Client数据接收回调函数，可以在这处理收到Server发来的数据*/
+static void ICACHE_FLASH_ATTR
+tcp_client_recv_cb(void* arg, char* pdata, unsigned short len) 
+{
+	os_printf("tcp client receive tcp server data\r\n");//21
+	os_printf("length: %d \r\ndata: %s\r\n", len, pdata);//22
+
+	//TO DO
+
+	/**
+	 *process the receive data
+	 */
+}
+
+/* TCP Client重连回调函数，可以在此函数里做重连接处理*/
+static void ICACHE_FLASH_ATTR
+tcp_client_recon_cb(void* arg, sint8 error) 
+{
+	os_printf("tcp client connect tcp server error %d\r\n", error);
+}
+
+/* TCP Client断开连接回调函数*/
+static void ICACHE_FLASH_ATTR
+tcp_client_discon_cb(void* arg) 
+{
+	os_printf("tcp client disconnect tcp server successful\r\n");
+}
+
+/*TCP Client连接成功回调函数*/
+static void ICACHE_FLASH_ATTR
+tcp_client_connect_cb(void* arg) 
+{
+	struct espconn* pespconn = arg;
+
+	os_printf("tcp client connect tcp server successful\r\n");//19
+	espconn_regist_recvcb(pespconn, tcp_client_recv_cb);//注册接收数据回调函数
+	espconn_regist_sentcb(pespconn, tcp_client_sent_cb);//注册数据发送完成回调函数
+	espconn_regist_disconcb(pespconn, tcp_client_discon_cb);//注册断开连接回调函数
+
+}
+
+/*TCP Client定时发送数据回调函数*/
+sint8 ICACHE_FLASH_ATTR
+tcp_client_send_data(struct espconn* espconn, uint8* pdata, uint16 length) 
+{
+	if (espconn == NULL) {
+		return ESPCONN_ARG;
+	}
+	espconn_send(espconn, pdata, length);
+}
+
+/*************************************************
+Function: tcp_client_init(struct espconn* espconn, uint8* remote_ip, struct ip_addr* local_ip, int remote_port)
+Description: tcp 客户端配置.
+Calls:// 被本函数调用的函数清单
+	os_memcpy(): 内存拷贝。os_memcpy(*des, *src, size_t n);
+			   //3个参数；需要拷贝进去的内存块指针，拷贝的目标内存块指针，拷贝的内存大小，
+			   //就是将size_t长度的src拷贝到des
+	ipaddr_addr():地址解释程序,返回的值按网络顺序排列
+Called By: // 调用本函数的函数清单
+	user_main.c: station_cnnect_callback(uint8_t status)
+*************************************************/
+void ICACHE_FLASH_ATTR
+tcp_client_init(struct espconn* espconn, uint8* remote_ip, struct ip_addr* local_ip, int remote_port) 
+{
+
+	uint32 server_ip = ipaddr_addr(remote_ip);
+
+	os_printf("tcp client connect to tcp server\r\n");//18
+	/* "." 结构体名，一般情况下读作"结构体的” “->”需要*结构体名，一般读作"结构体指向的" */
+	espconn->proto.tcp = (esp_tcp*)os_zalloc(sizeof(esp_tcp));
+	espconn->type = ESPCONN_TCP;
+
+	os_memcpy(espconn->proto.tcp->remote_ip, &server_ip, 4);//设置要连接的Server IP地址
+	espconn->proto.tcp->remote_port = remote_port;//设置要连接的Server 端口号
+	os_memcpy(espconn->proto.tcp->local_ip, local_ip, 4);//设置本地IP地址
+	espconn->proto.tcp->local_port = LOCAL_PORT;//设置本地端口号
+
+	espconn_regist_connectcb(espconn, tcp_client_connect_cb);//注册连接成功回调函数
+	espconn_regist_reconcb(espconn, tcp_client_recon_cb);//注册断连重新连接回调函数
+
+	espconn_connect(espconn);//Client连接Server
+}
+
+/*tcp 服务端函数声明 静态*/
+static void tcp_server_sent_cb(void* arg);
+static void tcp_server_recv_cb(void* arg, char* pdata, unsigned short length);
+static void tcp_server_recon_cb(void* arg, sint8 error);
+static void tcp_server_discon_cb(void* arg);
+static void tcp_server_listen_cb(void* arg);
+
+/*************************************************
+ Function: tcp_server_sent_cb(void* arg)
+ Description: tcp 服务发送数据回调
+ Calls:// 被本函数调用的函数清单
+
+ Called By: // 调用本函数的函数清单
+	 wangLuo.c: espconn_regist_recvcb(pespconn, tcp_server_recv_cb)
+ *************************************************/
+static void ICACHE_FLASH_ATTR
+tcp_server_sent_cb(void* arg) 
+{
+	os_printf("tcp server send data successful\r\n");
+
+}
+
+/*************************************************
+ Function: tcp_server_recv_cb(void* arg, char* pdata, unsigned short len)
+ Description: tcp 服务接收处理数据回调
+ Calls:// 被本函数调用的函数清单
+
+ Called By: // 调用本函数的函数清单
+	 wangLuo.c: espconn_regist_recvcb(pespconn, tcp_server_recv_cb)
+ *************************************************/
+static void ICACHE_FLASH_ATTR
+tcp_server_recv_cb(void* arg, char* pdata, unsigned short len) 
+{
+	os_printf("tcp server receive tcp client data\r\n");
+	os_printf("length: %d \r\ndata: %s\r\n", len, pdata);
+
+	//TO DO
+
+	/**
+	 *process the receive data
+	 */
+}
+
+/*************************************************
+ Function: tcp_server_recon_cb(void* arg, sint8 error)
+ Description: tcp 服务重新连接听回调
+ Calls:// 被本函数调用的函数清单
+
+ Called By: // 调用本函数的函数清单
+	 wangLuo.c: espconn_regist_recvcb(pespconn, tcp_server_recv_cb)
+ *************************************************/
+static void ICACHE_FLASH_ATTR
+tcp_server_recon_cb(void* arg, sint8 error) 
+{
+	os_printf("tcp server connect tcp client error %d\r\n", error);
+	//重新连接程序....
+}
+
+/*************************************************
+ Function: tcp_server_discon_cb(void* arg)
+ Description: tcp 服务端断开回调
+ Calls:// 被本函数调用的函数清单
+ Called By: // 调用本函数的函数清单
+	 wangLuo.c: espconn_regist_disconcb(pespconn, tcp_server_discon_cb)
+ *************************************************/
+static void ICACHE_FLASH_ATTR
+tcp_server_discon_cb(void* arg) 
+{
+	os_printf("tcp server disconnect tcp client successful\r\n");
+	//断开后的程序....
+}
+
+/*************************************************
+ Function: tcp_server_listen_cb(void* arg)
+ Description: tcp 服务端监听回调
+ Calls:// 被本函数调用的函数清单
+    espconn_regist_recvcb(pespconn, tcp_server_recv_cb);//注册收到数据回调函数
+	espconn_regist_sentcb(pespconn, tcp_server_sent_cb);//注册发送完数据回调函数
+	espconn_regist_disconcb(pespconn, tcp_server_discon_cb);//注册断开连接回调函数
+ Called By: // 调用本函数的函数清单
+	 wangLuo.c: tcp_server_init(struct espconn* espconn, uint16 local_port)
+	 wangLuo.c: tcp_server_init1(struct espconn* espconn, uint16 local_port)
+ *************************************************/
+static void ICACHE_FLASH_ATTR
+tcp_server_listen_cb(void* arg) 
+{
+	struct espconn* pespconn = arg;
+
+	os_printf("tcp server have tcp client connect\r\n");
+	espconn_regist_recvcb(pespconn, tcp_server_recv_cb);//注册收到数据回调函数
+	espconn_regist_sentcb(pespconn, tcp_server_sent_cb);//注册发送完数据回调函数
+	espconn_regist_disconcb(pespconn, tcp_server_discon_cb);//注册断开连接回调函数
+
+}
+
+/*************************************************
+ Function: tcp_server_send_data(struct espconn* espconn, uint8* pdata, uint16 length)
+ Description: tcp 服务端定时发送信息
+ Calls:// 被本函数调用的函数清单
+     espconn_send(espconn, pdata, length);
+ Called By: // 调用本函数的函数清单
+	 wangLuo.c: tcp_server_init(struct espconn* espconn, uint16 local_port)
+	 wangLuo.c: tcp_server_init1(struct espconn* espconn, uint16 local_port)
+ *************************************************/
+sint8 ICACHE_FLASH_ATTR
+tcp_server_send_data(struct espconn* espconn, uint8* pdata, uint16 length) 
+{
+	if (espconn == NULL) {
+		return ESPCONN_ARG;
+	}
+
+	espconn_send(espconn, pdata, length);
+}
+
+ /*************************************************
+ Function: tcp_server_init1(struct espconn* espconn, struct ip_addr* local_ip, uint16 local_port) 
+ Description: tcp 服务端配置，混合模式。
+ Calls:// 被本函数调用的函数清单
+	 os_zalloc: 申请(开辟)内存;(esp_tcp*)os_zalloc(sizeof(esp_tcp))
+				//申请一块大小为sizeof(esp_tcp)的内存，并将申请的内存强制转换
+				//为esp_tcp类型.
+    espconn_regist_connectcb(espconn, tcp_server_listen_cb);//注册Server监听回调函数
+	espconn_regist_reconcb(espconn, tcp_server_recon_cb);//注册断连重新连接回调函数
+	espconn_accept(espconn);//创建Server,开始监听
+	espconn_regist_time(espconn, 360, 0);//超时断开连接时间
+ Called By: // 调用本函数的函数清单
+	 user_main.c: station_cnnect_callback(uint8_t status)
+ *************************************************/
+void ICACHE_FLASH_ATTR
+tcp_server_init1(struct espconn* espconn, struct ip_addr* local_ip, uint16 local_port) 
+{
+	//uint32 server_ip = ipaddr_addr(remote_ip);
+	os_printf("tcp server waiting tcp client connect!\r\n");
+	espconn->proto.tcp = (esp_tcp*)os_zalloc(sizeof(esp_tcp));
+	espconn->type = ESPCONN_TCP;
+	os_memcpy(espconn->proto.tcp->local_ip, local_ip, 4);//设置本地IP地址
+	espconn->proto.tcp->local_port = local_port;//设置本地监听的端口号，等待Client连接
+	espconn_regist_connectcb(espconn, tcp_server_listen_cb);//注册Server监听回调函数
+	espconn_regist_reconcb(espconn, tcp_server_recon_cb);//注册断连重新连接回调函数
+	espconn_accept(espconn);//创建Server,开始监听
+	espconn_regist_time(espconn, 360, 0);//超时断开连接时间
+}
+
+/*************************************************
+Function: tcp_server_init1(struct espconn* espconn, struct ip_addr* local_ip, uint16 local_port)
+Description: tcp 服务端配置,在wifi客户端模式和AP模式都能正常运行
+Calls:// 被本函数调用的函数清单
+	os_zalloc: 申请(开辟)内存;(esp_tcp*)os_zalloc(sizeof(esp_tcp))
+			   //申请一块大小为sizeof(esp_tcp)的内存，并将申请的内存强制转换
+			   //为esp_tcp类型.
+    espconn_regist_connectcb(espconn, tcp_server_listen_cb);//注册Server监听回调函数
+	espconn_regist_reconcb(espconn, tcp_server_recon_cb);//注册断连重新连接回调函数
+	espconn_accept(espconn);//创建Server,开始监听
+	espconn_regist_time(espconn, 360, 0);//超时断开连接时间
+Called By: // 调用本函数的函数清单
+	user_main.c: station_cnnect_callback(uint8_t status)
+*************************************************/
+void ICACHE_FLASH_ATTR
+tcp_server_init(struct espconn* espconn, uint16 local_port)
+{
+	os_printf("tcp server waiting tcp client connect!\r\n");
+	espconn->proto.tcp = (esp_tcp*)os_zalloc(sizeof(esp_tcp));
+	espconn->type = ESPCONN_TCP;
+	espconn->proto.tcp->local_port = local_port;//设置本地监听的端口号，等待Client连接
+	espconn_regist_connectcb(espconn, tcp_server_listen_cb);//注册Server监听回调函数
+	espconn_regist_reconcb(espconn, tcp_server_recon_cb);//注册断连重新连接回调函数
+	espconn_accept(espconn);//创建Server,开始监听
+	espconn_regist_time(espconn, 360, 0);//超时断开连接时间
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

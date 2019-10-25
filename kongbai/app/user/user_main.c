@@ -192,7 +192,7 @@ blue_led_timer_toggle1(void){
 struct espconn tcp_client;
 //其他条件判断
 #elif TCP_SERVER
-struct espconn *tcp_server;
+struct espconn tcp_server;
 #elif UDP_TEST
 struct espconn udp_test;
 //结束
@@ -250,6 +250,7 @@ WifiStatus_Check(void){
 //		os_sprintf("MAC version:%s\n",MAC2STR(macaddr));
 
 #if   TCP_CLIENT
+		               //指针地址                   无类型
 		tcp_client_init(&tcp_client,TCP_SERVER_IP,&local_ip.ip,TCP_SERVER_PORT);
 		os_timer_disarm(&send_data_timer);//取消定时器
 		os_timer_setfn(&send_data_timer, (os_timer_func_t *) TCP_Send_data,NULL);//定时器回调函数

@@ -29,10 +29,13 @@ Modification:
 defined         　与#if, #elif配合使用，判断某个宏是否被定义
 ***************************************************/
 
-#ifndef USER_WIFI_H_
-#define USER_WIFI_H_
+#ifndef USER_WANGLUO_H_
+#define USER_WANGLUO_H_
 
 /*载入类型头文件*/
+#include "osapi.h"
+#include "espconn.h"
+#include "mem.h"
 #include "os_type.h"
 
 /***************************
@@ -62,11 +65,15 @@ Others: // 其它说明
 void ICACHE_FLASH_ATTR
 lian_jie_AP(uint8_t* ssid, uint8_t* pass, wifi_callback hui_diao);
 
+void tcp_client_init(struct espconn *espconn,uint8 *remote_ip,struct ip_addr *local_ip, int remote_port);
 
+sint8 tcp_client_send_data(struct espconn* espconn, uint8* pdata, uint16 length);
 
+void tcp_server_init1(struct espconn* espconn, struct ip_addr* local_ip, uint16 local_port);
 
+sint8 tcp_server_send_data(struct espconn* espconn, uint8* pdata, uint16 length);
 
-
+void tcp_server_init(struct espconn* espconn, uint16 local_port);
 
 
 

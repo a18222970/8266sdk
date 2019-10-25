@@ -336,6 +336,7 @@ tcp_client_send_data(struct espconn *espconn,uint8 *pdata,uint16 length){
  * @remote_port  要连接的TCP Server端口号
  */
 void ICACHE_FLASH_ATTR
+                             //指针变量
 tcp_client_init(struct espconn *espconn,uint8 *remote_ip,struct ip_addr *local_ip, int remote_port){
 
 	uint32 server_ip = ipaddr_addr(remote_ip);

@@ -327,7 +327,7 @@ struct softap_config {
     uint8 ssid_len;    // 设置ssid长度  Note: Recommend to set it according to your ssid  注意:建议根据您的ssid设置
     uint8 channel;     //通道号1 ~ 13  Note: support 1 ~ 13  注:支持1 ~ 13
     AUTH_MODE authmode;    //设置加密模式 默认3  Note: Don't support AUTH_WEP in softAP mode. 注意:在softAP模式下不支持AUTH_WEP。
-    uint8 ssid_hidden;    // 是否隐藏SSID  注意:默认为0 
+    uint8 ssid_hidden;    // 是否隐藏SSID  注意:默认为0 不隐藏
     uint8 max_connection;    // 最大连接数 Note: default 4, max 4
     uint16 beacon_interval;    // 信标间隔时槽100 ~ 60000 ms   Note: support 100 ~ 60000 ms, default 100
 };

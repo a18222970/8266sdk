@@ -28,8 +28,18 @@ Modification:
 /*wifi密码*/
 #define STA_PASS "chenxin1234567890"
 
+/*选择模式，TCP客服端，服务器端，UDP*/
+#define TCP_CLIENT 0  //客户端
+#define TCP_SERVER 1  //服务端
+
 /*TCP服务器地址*/
 #define TCP_SERVER_IP    "192.168.2.23" 
+
+/*TCP服务器端口*/
+#define TCP_SERVER_PORT   6666
+
+/*8266本地端口*/
+#define LOCAL_PORT        8266
 
 /*布尔类型true和false*/
 #define ZI_DONG_LIAN_JIE       1

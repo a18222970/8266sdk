@@ -120,14 +120,13 @@ ip4_addr_netmask_valid(u32_t netmask)
 #endif
 
 /**
- * Ascii internet address interpretation routine.
- * The value returned is in network order.
+ * Ascii互联网地址解释程序。.
+ * 返回的值按网络顺序排列.
  *
- * @param cp IP address in ascii represenation (e.g. "127.0.0.1")
- * @return ip address in network order
+ * @param 用ascii表示的cp IP地址(例如“127.0.0.1”)
+ * @return ip地址按网络顺序排列
  */
-u32_t
-ipaddr_addr(const char *cp)
+u32_t ipaddr_addr(const char *cp)
 {
   ip_addr_t val;
 
