@@ -3,14 +3,14 @@ Copyright (c) 2016 <ESPRESSIF SYSTEMS (SHANGHAI) PTE LTD>
 File name: wangLuo.c 
 Author: cx           
 Version: 1.0        
-Date: 2019.10.23    //Íê³ÉÈÕÆÚ
-Description: // ÓÃÓÚÏêÏ¸ËµÃ÷´Ë³ÌĞòÎÄ¼şÍê³ÉµÄÖ÷Òª¹¦ÄÜ£¬ÓëÆäËûÄ£¿é
-// »òº¯ÊıµÄ½Ó¿Ú£¬Êä³öÖµ¡¢È¡Öµ·¶Î§¡¢º¬Òå¼°²ÎÊı¼äµÄ¿Ø
-// ÖÆ¡¢Ë³Ğò¡¢¶ÀÁ¢»òÒÀÀµµÈ¹ØÏµ
-Others: // ÆäËüÄÚÈİµÄËµÃ÷
-Function List: // Ö÷Òªº¯ÊıÁĞ±í£¬Ã¿Ìõ¼ÇÂ¼Ó¦°üÀ¨º¯ÊıÃû¼°¹¦ÄÜ¼òÒªËµÃ÷
+Date: 2019.10.23    //å®Œæˆæ—¥æœŸ
+Description: // ç”¨äºè¯¦ç»†è¯´æ˜æ­¤ç¨‹åºæ–‡ä»¶å®Œæˆçš„ä¸»è¦åŠŸèƒ½ï¼Œä¸å…¶ä»–æ¨¡å—
+// æˆ–å‡½æ•°çš„æ¥å£ï¼Œè¾“å‡ºå€¼ã€å–å€¼èŒƒå›´ã€å«ä¹‰åŠå‚æ•°é—´çš„æ§
+// åˆ¶ã€é¡ºåºã€ç‹¬ç«‹æˆ–ä¾èµ–ç­‰å…³ç³»
+Others: // å…¶å®ƒå†…å®¹çš„è¯´æ˜
+Function List: // ä¸»è¦å‡½æ•°åˆ—è¡¨ï¼Œæ¯æ¡è®°å½•åº”åŒ…æ‹¬å‡½æ•°ååŠåŠŸèƒ½ç®€è¦è¯´æ˜
 1. ....
-History: // ĞŞ¸ÄÀúÊ·¼ÇÂ¼ÁĞ±í£¬Ã¿ÌõĞŞ¸Ä¼ÇÂ¼Ó¦°üÀ¨ĞŞ¸ÄÈÕÆÚ¡¢ĞŞ¸ÄÕß¼°ĞŞ¸ÄÄÚÈİ¼òÊö
+History: // ä¿®æ”¹å†å²è®°å½•åˆ—è¡¨ï¼Œæ¯æ¡ä¿®æ”¹è®°å½•åº”åŒ…æ‹¬ä¿®æ”¹æ—¥æœŸã€ä¿®æ”¹è€…åŠä¿®æ”¹å†…å®¹ç®€è¿°
 1. Date:
 Author:
 Modification:
@@ -27,48 +27,49 @@ Modification:
 #include "user_interface.h"
 #include "driver/uart.h"
 #include "modules/wangLuo.h"
+#include "../../include/osapi.h"
 
-/*¶¨ÒåÈí¶¨Ê±Æ÷*/
-static ETSTimer TCP_timer;  //ÖØĞÂ¹¹½¨¶¨Ê±Æ÷TCP_timer
+/*å®šä¹‰è½¯å®šæ—¶å™¨*/
+static ETSTimer TCP_timer;  //é‡æ–°æ„å»ºå®šæ—¶å™¨TCP_timer
 
-/*ÅĞ¶ÏÊÇÊ²Ã´·şÎñ*/
+/*åˆ¤æ–­æ˜¯ä»€ä¹ˆæœåŠ¡*/
 #if   TCP_CLIENT
-struct espconn tcp_client; //¿Í»§¶ËÄ£Ê½
+struct espconn tcp_client; //å®¢æˆ·ç«¯æ¨¡å¼
 #elif TCP_SERVER
-struct espconn tcp_server; //·şÎñ¶ËÄ£Ê½
-//½áÊø
+struct espconn tcp_server; //æœåŠ¡ç«¯æ¨¡å¼
+//ç»“æŸ
 #endif
 
-/*wifiÁ¬½Ó_¿Í»§¶ËÄ£Ê½_Á¬½ÓÂ·ÓÉÆ÷*/
+/*wifiè¿æ¥_å®¢æˆ·ç«¯æ¨¡å¼_è¿æ¥è·¯ç”±å™¨*/
 void ICACHE_FLASH_ATTR
 wiFi_lianJie(void)
 {
-	/*NULL_MODE       0x00  ¹Ø±Õwifi¹¦ÄÜ
-	  STATION_MODE    0x01  ¿Í»§¶ËÄ£Ê½_Á¬½ÓÂ·ÓÉÆ÷
-	  SOFTAP_MODE     0x02  APÄ£Ê½_ÈÈµã
-	  STATIONAP_MODE  0x03  »ìºÏÄ£Ê½  */
-	wifi_set_opmode(STATION_MODE);  //ÉèÖÃwifi¹¤×÷Ä£Ê½²¢±£´æ
+	/*NULL_MODE       0x00  å…³é—­wifiåŠŸèƒ½
+	  STATION_MODE    0x01  å®¢æˆ·ç«¯æ¨¡å¼_è¿æ¥è·¯ç”±å™¨
+	  SOFTAP_MODE     0x02  APæ¨¡å¼_çƒ­ç‚¹
+	  STATIONAP_MODE  0x03  æ··åˆæ¨¡å¼  */
+	wifi_set_opmode(STATION_MODE);  //è®¾ç½®wifiå·¥ä½œæ¨¡å¼å¹¶ä¿å­˜
 	char ssid[32] = "cccxxx";
 	char password[64] = "chenxin1234567890";
 
 	struct station_config stationConf;
-	stationConf.bssid_set = 0;                     //²»ĞèÒª¼ì²éapµÄmacµØÖ·
-	os_memcpy(&stationConf.ssid, ssid, 32);        //os_memcpy ÄÚ´æ¿½±´Ìî³ä¡£
+	stationConf.bssid_set = 0;                     //ä¸éœ€è¦æ£€æŸ¥apçš„macåœ°å€
+	os_memcpy(&stationConf.ssid, ssid, 32);        //os_memcpy å†…å­˜æ‹·è´å¡«å……ã€‚
 	os_memcpy(&stationConf.password, password, 64);
-	//wifi_station_set_config(&stationConf);       //ÉèÖÃWi-Fi Station²ÎÊı£¬±£´æµ½flash
-	wifi_station_set_config_current(&stationConf);//ÉèÖÃWi-Fi Station²ÎÊı£¬²»±£´æµ½flash
+	//wifi_station_set_config(&stationConf);       //è®¾ç½®Wi-Fi Stationå‚æ•°ï¼Œä¿å­˜åˆ°flash
+	wifi_station_set_config_current(&stationConf);//è®¾ç½®Wi-Fi Stationå‚æ•°ï¼Œä¸ä¿å­˜åˆ°flash
 	wifi_station_connect();
 	os_printf("duankou :OK\n");
 
-	/***********ÏµÍ³±ÀÀ£ÏÔÊ¾ÂÒÂëÊ±£¬´òÓ¡³ö´íĞÅÏ¢***************
-	 * ´òÓ¡´íÎóĞÅÏ¢£¬
-	 * reset reason: 6  Íâ²¿ÏµÍ³¸´Î»
-	 * 				 0 µçÔ´Õı³£Æô¶¯
-	 * 				 1 Ó²¼ş¿´ÃÅ¹·¸´Î»
-	 *               2 Òì³£¸´Î»£¬gpio×´Ì¬²»±ä
-	 *               3 Èí¼ş¿´ÃÅ¹·¸´Î»£¬gpio×´Ì¬²»±ä
-	 *               4 Èí¼şÖØÆô£¬system_restart, gpio×´Ì¬²»±ä
-	 *               5 ´Ó³ÁË¯ÖĞĞÑÀ´
+	/***********ç³»ç»Ÿå´©æºƒæ˜¾ç¤ºä¹±ç æ—¶ï¼Œæ‰“å°å‡ºé”™ä¿¡æ¯***************
+	 * æ‰“å°é”™è¯¯ä¿¡æ¯ï¼Œ
+	 * reset reason: 6  å¤–éƒ¨ç³»ç»Ÿå¤ä½
+	 * 				 0 ç”µæºæ­£å¸¸å¯åŠ¨
+	 * 				 1 ç¡¬ä»¶çœ‹é—¨ç‹—å¤ä½
+	 *               2 å¼‚å¸¸å¤ä½ï¼ŒgpioçŠ¶æ€ä¸å˜
+	 *               3 è½¯ä»¶çœ‹é—¨ç‹—å¤ä½ï¼ŒgpioçŠ¶æ€ä¸å˜
+	 *               4 è½¯ä»¶é‡å¯ï¼Œsystem_restart, gpioçŠ¶æ€ä¸å˜
+	 *               5 ä»æ²‰ç¡ä¸­é†’æ¥
 	 *********************************************************/
 	struct rst_info* rtc_info = system_get_rst_info();
 	os_printf("reset reason: %x\n", rtc_info->reason);
@@ -80,7 +81,7 @@ wiFi_lianJie(void)
 		{
 			os_printf("Fatal exception (%d):\n", rtc_info->exccause);
 		}
-		//´òÓ¡ÉÏ´Î±ÀÀ£µÄµØÖ·£¬¶àÓÃÓÚ±ÀÀ£Ê±ÂÒÂëµ÷ÊÔ
+		//æ‰“å°ä¸Šæ¬¡å´©æºƒçš„åœ°å€ï¼Œå¤šç”¨äºå´©æºƒæ—¶ä¹±ç è°ƒè¯•
 		os_printf("epc1=0x%08x, epc2=0x%08x, epc3=0x%08x,excvaddr=0x%08x, depc=0x%08x\n",
 			rtc_info->epc1, rtc_info->epc2, rtc_info->epc3, rtc_info->excvaddr, rtc_info->depc);
 	}
@@ -88,32 +89,32 @@ wiFi_lianJie(void)
 
 /*************************************************
 Function: wifi_AP 
-Description: wifi¹¤×÷ÔÚAPÄ£Ê½
-Calls:// ±»±¾º¯Êıµ÷ÓÃµÄº¯ÊıÇåµ¥
-	wifi_set_opmode_current(): ÉèÖÃwifi¹¤×÷Ä£Ê½£¬²»±£´æµ½flash;
-							   NULL_MODE       0x00  ¹Ø±Õwifi¹¦ÄÜ
-							   STATION_MODE    0x01  ¿Í»§¶ËÄ£Ê½_Á¬½ÓÂ·ÓÉÆ÷
-							   SOFTAP_MODE     0x02  APÄ£Ê½_ÈÈµã
-							   STATIONAP_MODE  0x03  »ìºÏÄ£Ê½
-    wifi_set_opmode(): ÉèÖÃwifi¹¤×÷Ä£Ê½£¬±£´æµ½flash;
-		wifi_set_sleep_type(): ÉèÖÃË¯ÃßÄ£Ê½
-	wifi_station_set_auto_connect()£º ÉèÖÃÉÏµçÊÇ·ñÁ¬½ÓÂ·ÓÉÆ÷£¬Ä¬ÈÏ×Ô¶¯Á¬½Ó¡£
-	                                  //Èç¹ûÔÚ·Çuser_init(void)ÖĞµ÷ÓÃ£¬»áÔÚÏÂ´ÎÆô¶¯Ê±ÉúĞ§
-	                             1 ×Ô¶¯Á¬½Ó
-								 0 ²»×Ô¶¯Á¬½Ó
-	os_strcpy():°ÑµÚ¶ş¸ö×Ö·û´®¸´ÖÆµ½µÚÒ»¸ö×Ö·û´®£¬²ÎÊıÎªÖ¸Õë£¬Ô­ĞÍÉùÃ÷
+Description: wifiå·¥ä½œåœ¨APæ¨¡å¼
+Calls:// è¢«æœ¬å‡½æ•°è°ƒç”¨çš„å‡½æ•°æ¸…å•
+	wifi_set_opmode_current(): è®¾ç½®wifiå·¥ä½œæ¨¡å¼ï¼Œä¸ä¿å­˜åˆ°flash;
+							   NULL_MODE       0x00  å…³é—­wifiåŠŸèƒ½
+							   STATION_MODE    0x01  å®¢æˆ·ç«¯æ¨¡å¼_è¿æ¥è·¯ç”±å™¨
+							   SOFTAP_MODE     0x02  APæ¨¡å¼_çƒ­ç‚¹
+							   STATIONAP_MODE  0x03  æ··åˆæ¨¡å¼
+    wifi_set_opmode(): è®¾ç½®wifiå·¥ä½œæ¨¡å¼ï¼Œä¿å­˜åˆ°flash;
+		wifi_set_sleep_type(): è®¾ç½®ç¡çœ æ¨¡å¼
+	wifi_station_set_auto_connect()ï¼š è®¾ç½®ä¸Šç”µæ˜¯å¦è¿æ¥è·¯ç”±å™¨ï¼Œé»˜è®¤è‡ªåŠ¨è¿æ¥ã€‚
+	                                  //å¦‚æœåœ¨éuser_init(void)ä¸­è°ƒç”¨ï¼Œä¼šåœ¨ä¸‹æ¬¡å¯åŠ¨æ—¶ç”Ÿæ•ˆ
+	                             1 è‡ªåŠ¨è¿æ¥
+								 0 ä¸è‡ªåŠ¨è¿æ¥
+	os_strcpy():æŠŠç¬¬äºŒä¸ªå­—ç¬¦ä¸²å¤åˆ¶åˆ°ç¬¬ä¸€ä¸ªå­—ç¬¦ä¸²ï¼Œå‚æ•°ä¸ºæŒ‡é’ˆï¼ŒåŸå‹å£°æ˜
 			   //char *ets_strcpy(char *s1, const char *s2);
-	wifi_softap_set_config(wifiAP_config¹¹½¨ÌåµØÖ·):ÉèÖÃwifi_AP½Ó¿ÚÅäÖÃ£¬±£´æµ½flash.
-	wifi_softap_set_config_current(wifiAP_config¹¹½¨ÌåµØÖ·):ÉèÖÃwifi_AP½Ó¿ÚÅäÖÃ£¬²»±£´æµ½flash.	
-Called By: // µ÷ÓÃ±¾º¯ÊıµÄº¯ÊıÇåµ¥
+	wifi_softap_set_config(wifiAP_configæ„å»ºä½“åœ°å€):è®¾ç½®wifi_APæ¥å£é…ç½®ï¼Œä¿å­˜åˆ°flash.
+	wifi_softap_set_config_current(wifiAP_configæ„å»ºä½“åœ°å€):è®¾ç½®wifi_APæ¥å£é…ç½®ï¼Œä¸ä¿å­˜åˆ°flash.	
+Called By: // è°ƒç”¨æœ¬å‡½æ•°çš„å‡½æ•°æ¸…å•
 	user_main.c: user_init(void)
 *************************************************/
 void ICACHE_FLASH_ATTR
 wifi_AP(void)
 {
 	struct softap_config wifiAP_config;
-	//wifi_set_opmode(STATIONAP_MODE);  //»ìºÏÄ£Ê½
-	wifi_set_opmode_current(SOFTAP_MODE);//apÄ£Ê½
+	//wifi_set_opmode(STATIONAP_MODE);  //æ··åˆæ¨¡å¼
+	wifi_set_opmode_current(SOFTAP_MODE);//apæ¨¡å¼
 	wifi_station_set_auto_connect(BU_LIAN_JIE);  
 	wifi_set_sleep_type(NONE_SLEEP_T);                     
 	wifiAP_config.ssid_len = 12;
@@ -129,7 +130,7 @@ wifi_AP(void)
 
 }
 
-/*Á¬½ÓAPºóµÄÖ´ĞĞ»Øµ÷£¬ÔÚÆô¶¯µÄÊ±ºòÒ²ÖÁÉÙ»áÖ´ĞĞÒ»´Î*/
+/*è¿æ¥APåçš„æ‰§è¡Œå›è°ƒï¼Œåœ¨å¯åŠ¨çš„æ—¶å€™ä¹Ÿè‡³å°‘ä¼šæ‰§è¡Œä¸€æ¬¡*/
 void ICACHE_FLASH_ATTR
 station_cnnect_callback(uint8_t status)
 {
@@ -139,8 +140,8 @@ station_cnnect_callback(uint8_t status)
 	if (wifi_zhuang_tai == STATION_GOT_IP)
 	{
 		struct ip_info station_ip;
-		wifi_get_ip_info(STATION_IF, &station_ip);//»ñÈ¡IP
-		//os_timer_disarm(&tcp_timer); //È¡Ïû¶¨Ê±Æ÷
+		wifi_get_ip_info(STATION_IF, &station_ip);//è·å–IP
+		//os_timer_disarm(&tcp_timer); //å–æ¶ˆå®šæ—¶å™¨
 		os_printf("tcpIP  %d\n", station_ip.ip);
         #if TCP_CLIENT
 		tcp_client_init(&tcp_client, TCP_SERVER_IP, &station_ip.ip, TCP_SERVER_PORT);
@@ -149,18 +150,18 @@ station_cnnect_callback(uint8_t status)
 		tcp_server_init(&tcp_server, LOCAL_PORT);
         #endif
 		os_printf("wifi_chenggong_cnnect");
-		//os_printf("IP Address :"IPSTR"\r\n", IP2STR(ipaddr));//´òÓ¡IP
+		//os_printf("IP Address :"IPSTR"\r\n", IP2STR(ipaddr));//æ‰“å°IP
 	}
 }
 
-/*³ÌĞòÈë¿Ú*/
+/*ç¨‹åºå…¥å£*/
 void ICACHE_FLASH_ATTR
 user_init(void)
 {
 	uart_init(115200, 115200);
 	os_delay_us(50);
     os_printf("ESP_SDK version:%s\n", system_get_sdk_version());
-	//Êä³öĞ¾Æ¬ID(Î¨Ò»),%d Êä³öÊ®½øÖÆÕûÊı
+	//è¾“å‡ºèŠ¯ç‰‡ID(å”¯ä¸€),%d è¾“å‡ºåè¿›åˆ¶æ•´æ•°
 	os_printf("ID version:%d\n", system_get_chip_id());
 	
 	//wiFi_lianJie();
@@ -169,7 +170,7 @@ user_init(void)
 	os_printf("\n\nHello World0003! KO\n\n");
 }
 
-/********************   ÄÚ´æ²¼¾Ö ²»Òª¸Ä¶¯  ¿ªÊ¼          *********/
+/********************   å†…å­˜å¸ƒå±€ ä¸è¦æ”¹åŠ¨  å¼€å§‹          *********/
 #if ((SPI_FLASH_SIZE_MAP == 0) || (SPI_FLASH_SIZE_MAP == 1))
 #error "The flash map is not supported"
 #elif (SPI_FLASH_SIZE_MAP == 2)
@@ -202,9 +203,9 @@ user_init(void)
 #define SYSTEM_PARTITION_RF_CAL_ADDR						0x3fb000
 #define SYSTEM_PARTITION_PHY_DATA_ADDR						0x3fc000
 #define SYSTEM_PARTITION_SYSTEM_PARAMETER_ADDR				0x3fd000
-/*   Ô¤¶¨ÒåµØÖ··Ö²¼²ÎÊı
+/*   é¢„å®šä¹‰åœ°å€åˆ†å¸ƒå‚æ•°
  * 0x6A000=434176=106
- * 0x101000=1052672×Ö½Ú=257ÉÈÇø
+ * 0x101000=1052672å­—èŠ‚=257æ‰‡åŒº
  * 0x3fb000=4173824=1019
  * 0x3fc000=4177920=1020
  * 0x3fd000=4182016=1021
@@ -214,7 +215,7 @@ user_init(void)
 #endif
 
 static const partition_item_t at_partition_table[] = {
-	/*Òª·ÖÅäÏµÍ³¿Õ¼äÃû×Ö                                ·ÖÅäµÄµØÖ·                                            ·ÖÅäµÄÄÚ´æ¿Õ¼ä´óĞ¡*/
+	/*è¦åˆ†é…ç³»ç»Ÿç©ºé—´åå­—                                åˆ†é…çš„åœ°å€                                            åˆ†é…çš„å†…å­˜ç©ºé—´å¤§å°*/
 	{ SYSTEM_PARTITION_BOOTLOADER, 						0x0, 												0x1000},
 	{ SYSTEM_PARTITION_OTA_1,   						0x1000, 											SYSTEM_PARTITION_OTA_SIZE},
 	{ SYSTEM_PARTITION_OTA_2,   						SYSTEM_PARTITION_OTA_2_ADDR, 						SYSTEM_PARTITION_OTA_SIZE},
@@ -222,7 +223,7 @@ static const partition_item_t at_partition_table[] = {
 	{ SYSTEM_PARTITION_PHY_DATA, 						SYSTEM_PARTITION_PHY_DATA_ADDR, 					0x1000},
 	{ SYSTEM_PARTITION_SYSTEM_PARAMETER, 				SYSTEM_PARTITION_SYSTEM_PARAMETER_ADDR, 			0x3000},
 };
-/*×¢²á·ÖÇø±í*/
+/*æ³¨å†Œåˆ†åŒºè¡¨*/
 void ICACHE_FLASH_ATTR user_pre_init(void)
 {
 	if (!system_partition_table_regist(at_partition_table, sizeof(at_partition_table) / sizeof(at_partition_table[0]), SPI_FLASH_SIZE_MAP)) {
@@ -230,4 +231,4 @@ void ICACHE_FLASH_ATTR user_pre_init(void)
 		while (1);
 	}
 }
-/********************   ÄÚ´æ²¼¾Ö ²»Òª¸Ä¶¯  ½áÊø          *********/
+/********************   å†…å­˜å¸ƒå±€ ä¸è¦æ”¹åŠ¨  ç»“æŸ          *********/

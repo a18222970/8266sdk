@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "ets_sys.h": "c",
+        "wangluo.h": "c",
+        "osapi.h": "c"
+    }
+}

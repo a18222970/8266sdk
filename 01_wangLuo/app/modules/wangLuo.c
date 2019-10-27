@@ -1,4 +1,4 @@
-﻿/*************************************************
+/*************************************************
 Copyright (c) 2016 <ESPRESSIF SYSTEMS (SHANGHAI) PTE LTD>  //版权
 File name: wangLuo.c // 文件名
 Author: cx           // 作者
@@ -270,7 +270,7 @@ static void tcp_server_listen_cb(void* arg);
 
 /*************************************************
  Function: tcp_server_sent_cb(void* arg)
- Description: tcp 服务发送数据回调
+ Description: tcp 服务发送数据成功回调
  Calls:// 被本函数调用的函数清单
 
  Called By: // 调用本函数的函数清单
@@ -287,21 +287,30 @@ tcp_server_sent_cb(void* arg)
  Function: tcp_server_recv_cb(void* arg, char* pdata, unsigned short len)
  Description: tcp 服务接收处理数据回调
  Calls:// 被本函数调用的函数清单
-
+    strcmp(): 比较字符串str1和str2是否相同。如果相同则返回0
+	os_sprintf(): 将第二个参数格式化打印到第一个参数，于赋值差不多。
+	               //除了前两个参数固定外，可选参数可以是任意个
+				   //只要在printf中可以使用的格式化字符串，在sprintf都可以使用
+    strlen(): 它用来计算指定字符串 str 的长度，但不包括结束字符（即 null 字符）
+    espconn_send(): 发送信息；原型声明 sint8 espconn_send(struct espconn *espconn, uint8 *psent, uint16 length)
+	               //1.结构体类型参数，2.发送的信息，3.信息长度
  Called By: // 调用本函数的函数清单
 	 wangLuo.c: espconn_regist_recvcb(pespconn, tcp_server_recv_cb)
  *************************************************/
 static void ICACHE_FLASH_ATTR
 tcp_server_recv_cb(void* arg, char* pdata, unsigned short len) 
 {
-	os_printf("tcp server receive tcp client data\r\n");
 	os_printf("length: %d \r\ndata: %s\r\n", len, pdata);
-
-	//TO DO
-
-	/**
-	 *process the receive data
-	 */
+	/*判断，结果为0就发送信息，并把每次发送的序号+1*/
+	if (strcmp(pdata, "a001") == 0)
+	{
+		uint16 xu_hao = 1;
+		uint8 fa_song_shu_ju[50];
+		os_sprintf(fa_song_shu_ju, "hi this is ESP8266 TCP SERVER![%d]\r\n", xu_hao);//23
+	   /*strlen 是一个函数，它用来计算指定字符串 str 的长度，但不包括结束字符（即 null 字符）*/
+		espconn_send((struct espconn*) arg, fa_song_shu_ju, strlen(fa_song_shu_ju));
+		fa_song_shu_ju++;
+	}
 }
 
 /*************************************************
@@ -358,7 +367,7 @@ tcp_server_listen_cb(void* arg)
 
 /*************************************************
  Function: tcp_server_send_data(struct espconn* espconn, uint8* pdata, uint16 length)
- Description: tcp 服务端定时发送信息
+ Description: tcp 服务端发送信息
  Calls:// 被本函数调用的函数清单
      espconn_send(espconn, pdata, length);
  Called By: // 调用本函数的函数清单

@@ -52,16 +52,16 @@ typedef void (* espconn_reconnect_callback)(void *arg, sint8 err);
 #define ESPCONN_HANDSHAKE  -28   /* ssl handshake failed	 */
 #define ESPCONN_SSL_INVALID_DATA  -61   /* ssl application invalid	 */
 
-/** espconnµÄĞ­Òé×åºÍÀàĞÍ */
+/** espconnçš„åè®®æ—å’Œç±»å‹ */
 enum espconn_type {
-    ESPCONN_INVALID    = 0,  //ÎŞĞ§
-    /* TCPĞ­Òé */
+    ESPCONN_INVALID    = 0,  //æ— æ•ˆ
+    /* TCPåè®® */
     ESPCONN_TCP        = 0x10,
-    /* UDPĞ­Òé */
+    /* UDPåè®® */
     ESPCONN_UDP        = 0x20,
 };
 
-/** espconnµÄµ±Ç°×´Ì¬. ·ÇTCP espconn Ê¼ÖÕ´¦ÓÚ ESPCONN_NONE ×´Ì¬! */
+/** espconnçš„å½“å‰çŠ¶æ€. éTCP espconn å§‹ç»ˆå¤„äº ESPCONN_NONE çŠ¶æ€! */
 enum espconn_state {
     ESPCONN_NONE,
     ESPCONN_WAIT,
@@ -100,17 +100,17 @@ typedef struct _remot_info{
 typedef void (* espconn_recv_callback)(void *arg, char *pdata, unsigned short len);
 typedef void (* espconn_sent_callback)(void *arg);
 
-/** espconn ½á¹¹*/
+/** espconn ç»“æ„*/
 struct espconn {
-    /**espconn (TCP¡¢UDP)ÀàĞÍ */
+    /**espconn (TCPã€UDP)ç±»å‹ */
     enum espconn_type type;
-    /** espconnµÄµ±Ç°×´Ì¬ */
+    /** espconnçš„å½“å‰çŠ¶æ€ */
     enum espconn_state state;
     union {
         esp_tcp *tcp;
         esp_udp *udp;
     } proto;
-    /** Ò»¸ö»Øµ÷º¯Êı£¬Ëü±»¸æÖª¹ØÓÚÕâ¸öespconnµÄÊÂ¼ş */
+    /** ä¸€ä¸ªå›è°ƒå‡½æ•°ï¼Œå®ƒè¢«å‘ŠçŸ¥å…³äºè¿™ä¸ªespconnçš„äº‹ä»¶ */
     espconn_recv_callback recv_callback;
     espconn_sent_callback sent_callback;
     uint8 link_cnt;
@@ -296,7 +296,7 @@ sint8 espconn_regist_write_finish(struct espconn *espconn, espconn_connect_callb
 
 /******************************************************************************
  * FunctionName : espconn_send
- * Description  : ·¢ËÍ¸ø¿Í»§¶Ë»ò·şÎñÆ÷µÄÊı¾İ
+ * Description  : TCPå‘é€ç»™å®¢æˆ·ç«¯æˆ–æœåŠ¡å™¨çš„æ•°æ®
  * Parameters   : espconn -- espconn to set for client or server
  *                psent -- data to send
  *                length -- length of data to send
@@ -307,7 +307,7 @@ sint8 espconn_send(struct espconn *espconn, uint8 *psent, uint16 length);
 
 /******************************************************************************
  * FunctionName : espconn_sent
- * Description  : sent data for client or server
+ * Description  : TCPå‘é€ç»™å®¢æˆ·ç«¯æˆ–æœåŠ¡å™¨çš„æ•°æ®
  * Parameters   : espconn -- espconn to set for client or server
  *                psent -- data to send
  *                length -- length of data to send
