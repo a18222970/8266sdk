@@ -15,6 +15,7 @@ History: // 修改历史记录列表，每条修改记录应包括修改日期�
 Author:
 Modification:
 2. ...
+#include "../../include/osapi.h"
 *************************************************/
 
 #include "ets_sys.h"
@@ -27,7 +28,6 @@ Modification:
 #include "user_interface.h"
 #include "driver/uart.h"
 #include "modules/wangLuo.h"
-#include "../../include/osapi.h"
 
 /*定义软定时器*/
 static ETSTimer TCP_timer;  //重新构建定时器TCP_timer
@@ -134,7 +134,6 @@ wifi_AP(void)
 void ICACHE_FLASH_ATTR
 station_cnnect_callback(uint8_t status)
 {
-	//struct espconn tcp_client;
 	uint8 wifi_zhuang_tai;
 	wifi_zhuang_tai = wifi_station_get_connect_status();
 	if (wifi_zhuang_tai == STATION_GOT_IP)
@@ -143,12 +142,16 @@ station_cnnect_callback(uint8_t status)
 		wifi_get_ip_info(STATION_IF, &station_ip);//获取IP
 		//os_timer_disarm(&tcp_timer); //取消定时器
 		os_printf("tcpIP  %d\n", station_ip.ip);
-        #if TCP_CLIENT
+     #if TCP_CLIENT
 		tcp_client_init(&tcp_client, TCP_SERVER_IP, &station_ip.ip, TCP_SERVER_PORT);
-        #elif TCP_SERVER
-		//tcp_server_init1(&tcp_server, &station_ip.ip, LOCAL_PORT);
+     #elif TCP_SERVER
 		tcp_server_init(&tcp_server, LOCAL_PORT);
-        #endif
+     #elif GET_HTTP
+		get_acquire("https://api.seniverse.com/v3/weather/daily.json?key=rrpd2zmqkpwlsckt&location=guangzhou&language=en&unit=c&start=0&days=3");
+		//get_acquire("http://116.62.81.138/v3/weather/daily.json?key=rrpd2zmqkpwlsckt&location=guangzhou&language=en&unit=c&start=0&days=3");
+     //#elif POST
+
+     #endif
 		os_printf("wifi_chenggong_cnnect");
 		//os_printf("IP Address :"IPSTR"\r\n", IP2STR(ipaddr));//打印IP
 	}
@@ -165,8 +168,8 @@ user_init(void)
 	os_printf("ID version:%d\n", system_get_chip_id());
 	
 	//wiFi_lianJie();
-	lian_jie_AP(STA_SSID, STA_PASS, station_cnnect_callback);
-	//wifi_AP();
+	lian_jie_AP(STA_SSID, STA_PASS, station_cnnect_callback);//station模式
+	//wifi_AP();  //AP模式
 	os_printf("\n\nHello World0003! KO\n\n");
 }
 

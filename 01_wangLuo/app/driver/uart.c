@@ -1,26 +1,3 @@
-/*
- * ESPRESSIF MIT License
- *
- * Copyright (c) 2016 <ESPRESSIF SYSTEMS (SHANGHAI) PTE LTD>
- *
- * Permission is hereby granted for use on ESPRESSIF SYSTEMS ESP8266 only, in which case,
- * it is free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the Software is furnished
- * to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies or
- * substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- */
 
 #include "ets_sys.h"
 #include "osapi.h"
@@ -200,7 +177,8 @@ uart0_tx_buffer(uint8 *buf, uint16 len)
  * Description  : use uart0 to transfer buffer
  * Parameters   : uint8 *buf - point to send buffer
  *                uint16 len - buffer len
- * Returns      :
+ * Returns      :用 const 定义的变量的值是不允许改变的
+                 *str的意思是：str是一个指针（即指向某一个区域的地址）,如果前面加了修饰，就表示为那个类型的指针
 *******************************************************************************/
 void ICACHE_FLASH_ATTR
 uart0_sendStr(const char *str)

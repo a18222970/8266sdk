@@ -799,9 +799,9 @@ espconn_regist_write_finish(struct espconn *espconn, espconn_connect_callback wr
 
 /******************************************************************************
  * FunctionName : espconn_regist_connectcb
- * Description  : ����ָ�����ӵ�����ʱӦ���õĺ���
- * Parameters   : espconn -- �������ӻص�
- *                connect_cb -- �����ӵĻص�������������ʱ����
+ * Description  : 用于指定连接到主机时应调用的函数
+ * Parameters   : espconn -- 设置连接回调
+ *                connect_cb -- 已连接的回调函数，在连接时调用
  * Returns      : none
 *******************************************************************************/
 sint8 ICACHE_FLASH_ATTR
@@ -1334,14 +1334,12 @@ espconn_port(void)
 
 /******************************************************************************
  * FunctionName : espconn_gethostbyname
- * Description  : Resolve a hostname (string) into an IP address.
- * Parameters   : pespconn -- espconn to resolve a hostname
- *                hostname -- the hostname that is to be queried
- *                addr -- pointer to a ip_addr_t where to store the address if 
- *                        it is already cached in the dns_table (only valid if
- *                        ESPCONN_OK is returned!)
- *                found -- a callback function to be called on success, failure
- *                         or timeout (only if ERR_INPROGRESS is returned!)
+ * Description  : 将主机名(字符串)解析为IP地址。
+ * Parameters   : pespconn -- espconn来解析主机名
+ *                hostname -- 要查询的主机名
+ *                addr -- 指向ip_addr_t的指针，如果地址已经缓存在dns_table中，
+                          则该地址存储在ip_addr_t中(仅在ESPCONN_OK返回时有效!)
+ *                found -- 在成功、失败或超时时调用的回调函数(仅在返回ERR_INPROGRESS时才调用!)
  * Returns      : err_t return code
  *                - ESPCONN_OK if hostname is a valid IP address string or the host
  *                  name is already in the local names table.

@@ -1,6 +1,7 @@
 /*
- * debug.h
- *
+ * Called By: // 调用本函数的函数清单
+        wangluo.c: wifi_check_ip(void* arg)
+        wangluo.c: lian_jie_AP(uint8_t* ssid, uint8_t* pass, wifi_callback hui_diao)
  *  Created on: Dec 4, 2014
  *      Author: Minh
  */

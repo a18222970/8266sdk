@@ -65,15 +65,36 @@ Others: // 其它说明
 void ICACHE_FLASH_ATTR
 lian_jie_AP(uint8_t* ssid, uint8_t* pass, wifi_callback hui_diao);
 
-void tcp_client_init(struct espconn *espconn,uint8 *remote_ip,struct ip_addr *local_ip, int remote_port);
+/*TCP客户端创建*/
+void ICACHE_FLASH_ATTR
+tcp_client_init(struct espconn *espconn,uint8 *remote_ip,struct ip_addr *local_ip, int remote_port);
 
+/*TCP客户端发送信息*/
 sint8 tcp_client_send_data(struct espconn* espconn, uint8* pdata, uint16 length);
 
-void tcp_server_init1(struct espconn* espconn, struct ip_addr* local_ip, uint16 local_port);
-
+/*TCP服务器端发送信息*/
 sint8 tcp_server_send_data(struct espconn* espconn, uint8* pdata, uint16 length);
 
-void tcp_server_init(struct espconn* espconn, uint16 local_port);
+/*TCP服务器端创建*/
+void ICACHE_FLASH_ATTR
+tcp_server_init(struct espconn* espconn, uint16 local_port);
+
+/*GET获取网页数据*/
+void ICACHE_FLASH_ATTR
+get_acquire(char* URL);
+
+
+
+/*POST获取网页数据*/
+void ICACHE_FLASH_ATTR
+post_acquire(char* URL, char* method, char* postdata);
+
+char buffer[1024];
+char host[32];
+char filename[208];
+#define GET "GET /%s HTTP/1.1\r\nContent-Type: text/html;charset=utf-8\r\nAccept: */*\r\nHost: %s\r\nConnection: Keep-Alive\r\n\r\n"
+unsigned short port;
+struct espconn user_tcp_conn;
 
 
 
